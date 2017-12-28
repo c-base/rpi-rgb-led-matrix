@@ -1,7 +1,7 @@
 CFLAGS=-Wall -O3 -g
 CXXFLAGS=$(CFLAGS)
-OBJECTS=demo-main.o minimal-example.o c-example.o text-example.o clock.o
-BINARIES=demo minimal-example c-example text-example clock
+OBJECTS=demo-main.o minimal-example.o c-example.o text-example.o clock.o pong.o
+BINARIES=demo minimal-example c-example text-example clock pong
 
 # Where our library resides. You mostly only need to change the
 # RGB_LIB_DISTRIBUTION, this is where the library is checked out.
@@ -23,6 +23,7 @@ demo : demo-main.o $(RGB_LIBRARY)
 minimal-example : minimal-example.o
 text-example: text-example.o
 clock : clock.o
+pong : pong.o
 
 # All the binaries that have the same name as the object file.q
 % : %.o $(RGB_LIBRARY)
