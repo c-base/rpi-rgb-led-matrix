@@ -14,13 +14,14 @@
 #include <signal.h>
 #include "snake.h"
 
-volatile bool interrupt_received = false;
-static void InterruptHandler(int signo) {
-  interrupt_received = true;
-}
-
 Snake::Snake() {
+  interruptReceived_ = false;
 
+  // It is always good to set up a signal handler to cleanly exit when we
+  // receive a CTRL-C for instance. The DrawOnCanvas() routine is looking
+  // for that.
+  signal(SIGTERM, interruptHandler);
+  signal(SIGINT,  interruptHandler);
 }
 
 Snake::~Snake() {
@@ -38,9 +39,10 @@ void Snake::init(int argc, char* pArgv[]) {
 
 int Snake::run() { 
   while(true) {
-    if (interrupt_received)
-     return 1;
+    if (interruptReceived_)
+     return 0;
 
+    tick();
     usleep(1000 * 1000);
   }
 
@@ -99,16 +101,22 @@ void Snake::draw() {
 }
 
 void Snake::tick() {
-  
+  printf("tick\n");
+
+ 
 }
 
-int main(int argc, char* pArgv[]) {
-  // It is always good to set up a signal handler to cleanly exit when we
-  // receive a CTRL-C for instance. The DrawOnCanvas() routine is looking
-  // for that.
-  signal(SIGTERM, InterruptHandler);
-  signal(SIGINT, InterruptHandler);
+void Snake::interruptReceived() {
+  interruptReceived_ = true;
+}
 
+void Snake::interruptHandler(int sigNo) {
+  // TODO: don't ignore sigNo
+
+  Snake::_instance()->interruptReceived();
+}
+
+int main(int argc, char* pArgv[]) { 
   Snake::_create();
   Snake::_instance()->init(argc, pArgv);
 
