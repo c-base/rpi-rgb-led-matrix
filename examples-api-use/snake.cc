@@ -12,120 +12,99 @@
 #include <math.h>
 #include <stdio.h>
 #include <signal.h>
-
-using rgb_matrix::GPIO;
-using rgb_matrix::RGBMatrix;
-using rgb_matrix::Canvas;
+#include "snake.h"
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
   interrupt_received = true;
 }
 
-// 128x32
-
-enum class Item {
-  None = 0,
-  Wall = 1,
-  Food = 2
-};
-
-static Item _pField[128][32]; 
-
-static void initField() {
- for(int x = 0; x < 128; x++)
-   for(int y = 0; y < 32; y++)
-     _pField[x][y] = Item::None;    
-}
-
-static void generateMaze() {
-  for(int x = 0; x < 128; x++) {
-    _pField[x][0]  = Item::Wall; 
-    _pField[x][31] = Item::Wall; 
-  }   
-
-  for(int y = 0; y < 32; y++) {
-    _pField[0][y]   = Item::Wall;
-    _pField[127][y] = Item::Wall;
-  }    
-}
-
-static void DrawOnCanvas(Canvas* pCanvas) {
-  initField();
+Snake::Snake(int argc, char* pArgv[]) {
+  initMaze(argc, pArgv);
   generateMaze();
-  
+  draw();
+}
 
-  _pField[0][0] = Item::Wall;
+Snake::~Snake() {
+  pCanvas_->Clear();
 
-  for(int x=0; x<128; x++) {
-    for(int y=0; y<32; y++) {      
-      switch(_pField[x][y]) {
-        case Item::None:
-          pCanvas->SetPixel(x, y, 0, 0, 0);
-          break;
+  if(pCanvas_)
+    delete pCanvas_;
+}
 
-        case Item::Wall:
-          pCanvas->SetPixel(x, y, 255, 255, 255);
-          break;
-
-        case Item::Food:
-          pCanvas->SetPixel(x, y, 0, 255, 0);
-          break;
-      }
-    }
-  }
-
+void Snake::run() { 
   while(true) {
     if (interrupt_received)
      return;
 
     usleep(1000 * 1000);
   }
-
-/*
-  canvas->Fill(0, 0, 255);
-
-  int center_x = canvas->width() / 2;
-  int center_y = canvas->height() / 2;
-  float radius_max = canvas->width() / 2;
-  float angle_step = 1.0 / 360;
-
-  for (float a = 0, r = 0; r < radius_max; a += angle_step, r += angle_step) {
-    if (interrupt_received)
-      return;
-    float dot_x = cos(a * 2 * M_PI) * r;
-    float dot_y = sin(a * 2 * M_PI) * r;
-    canvas->SetPixel(center_x + dot_x, center_y + dot_y,
-                     255, 0, 0);
-    usleep(1 * 1000);  // wait a little to slow down things.
-  }
-*/
-
 }
 
-int main(int argc, char *argv[]) {
+void Snake::initMaze(int argc, char* pArgv[]) {
+ for(int x = 0; x < 128; x++)
+   for(int y = 0; y < 32; y++)
+     pField_[x][y] = Item::None;
+
   RGBMatrix::Options defaults;
   defaults.hardware_mapping = "regular";  // or e.g. "adafruit-hat"
   defaults.rows = 32;
   defaults.chain_length = 4;
   defaults.parallel = 1;
   defaults.show_refresh_rate = true;
-  Canvas *canvas = rgb_matrix::CreateMatrixFromFlags(&argc, &argv, &defaults);
+  pCanvas_ = rgb_matrix::CreateMatrixFromFlags(&argc, &pArgv, &defaults);
 
-  if (canvas == NULL)
-    return 1;
+  if (pCanvas_ == NULL) { 
+    printf("Error: failed creating canvas!");
+    exit(1);
+  }
+}
 
+void Snake::generateMaze() {
+  for(int x = 0; x < 128; x++) {
+    pField_[x][0]  = Item::Wall; 
+    pField_[x][31] = Item::Wall; 
+  }   
+
+  for(int y = 0; y < 32; y++) {
+    pField_[0][y]   = Item::Wall;
+    pField_[127][y] = Item::Wall;
+  }    
+}
+
+void Snake::draw() {
+  for(int x=0; x<128; x++) {
+    for(int y=0; y<32; y++) {      
+      switch(pField_[x][y]) {
+        case Item::None:
+          pCanvas_->SetPixel(x, y, 0, 0, 0);
+          break;
+
+        case Item::Wall:
+          pCanvas_->SetPixel(x, y, 255, 255, 255);
+          break;
+
+        case Item::Food:
+          pCanvas_->SetPixel(x, y, 0, 255, 0);
+          break;
+      }
+    }
+  }
+}
+
+void Snake::tick() {
+  
+}
+
+int main(int argc, char* pArgv[]) {
   // It is always good to set up a signal handler to cleanly exit when we
   // receive a CTRL-C for instance. The DrawOnCanvas() routine is looking
   // for that.
   signal(SIGTERM, InterruptHandler);
   signal(SIGINT, InterruptHandler);
 
-  DrawOnCanvas(canvas); // Using the canvas.
-
-  // Animation finished. Shut down the RGB matrix.
-  canvas->Clear();
-  delete canvas;
+  Snake snake(argc, pArgv);
+  snake.run();
 
   return 0;
 }
