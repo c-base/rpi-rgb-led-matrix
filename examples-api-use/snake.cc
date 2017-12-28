@@ -19,10 +19,8 @@ static void InterruptHandler(int signo) {
   interrupt_received = true;
 }
 
-Snake::Snake(int argc, char* pArgv[]) {
-  initMaze(argc, pArgv);
-  generateMaze();
-  draw();
+Snake::Snake() {
+
 }
 
 Snake::~Snake() {
@@ -32,13 +30,21 @@ Snake::~Snake() {
     delete pCanvas_;
 }
 
-void Snake::run() { 
+void Snake::init(int argc, char* pArgv[]) {
+  initMaze(argc, pArgv);
+  generateMaze();
+  draw();
+}
+
+int Snake::run() { 
   while(true) {
     if (interrupt_received)
-     return;
+     return 1;
 
     usleep(1000 * 1000);
   }
+
+  return 0;
 }
 
 void Snake::initMaze(int argc, char* pArgv[]) {
@@ -103,9 +109,9 @@ int main(int argc, char* pArgv[]) {
   signal(SIGTERM, InterruptHandler);
   signal(SIGINT, InterruptHandler);
 
-  Snake snake(argc, pArgv);
-  snake.run();
+  Snake::_create();
+  Snake::_instance()->init(argc, pArgv);
 
-  return 0;
+  return Snake::_instance()->run();
 }
 
