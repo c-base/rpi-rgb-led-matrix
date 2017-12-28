@@ -1,0 +1,1 @@
+{ ip a l dev eth0 | sed -n 's,^.*inet \(.*\)/.*$,\1,p' ; sleep 10 ; }  | sudo /home/pi/rpi-rgb-led-matrix/examples-api-use/text-example --led-chain=4 -f /home/pi/rpi-rgb-led-matrix/fonts/9x18B.bdf -C 0,100,255 -B 100,0,0
