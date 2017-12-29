@@ -15,11 +15,9 @@
 #include "snake.h"
 
 Snake::Snake() {
+  // Clean exit when user hits CTRL-C:
   interruptReceived_ = false;
 
-  // It is always good to set up a signal handler to cleanly exit when we
-  // receive a CTRL-C for instance. The DrawOnCanvas() routine is looking
-  // for that.
   signal(SIGTERM, interruptHandler);
   signal(SIGINT,  interruptHandler);
 }
