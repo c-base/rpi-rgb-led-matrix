@@ -1,5 +1,5 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
-// Snake game (work in progress)
+// LedMatrixApp game (work in progress)
 //
 // This code is public domain
 // (but note, that the led-matrix library this depends on is GPL v2)
@@ -14,7 +14,11 @@
 #include <signal.h>
 #include "snake.h"
 
-Snake::Snake() {
+//-----------------------------------------------------
+// LedMatrixApp
+//-----------------------------------------------------
+
+LedMatrixApp::LedMatrixApp() {
   // Clean exit when user hits CTRL-C:
   interruptReceived_ = false;
 
@@ -22,20 +26,23 @@ Snake::Snake() {
   signal(SIGINT,  interruptHandler);
 }
 
-Snake::~Snake() {
+LedMatrixApp::~LedMatrixApp() {
   pCanvas_->Clear();
 
   if(pCanvas_)
     delete pCanvas_;
 }
 
-void Snake::init(int argc, char* pArgv[]) {
+void LedMatrixApp::init(int argc, char* pArgv[]) {
+  Maze m;
+  m.render();
+
   initMaze(argc, pArgv);
   generateMaze();
   draw();
 }
 
-int Snake::run() { 
+int LedMatrixApp::run() { 
   while(true) {
     if (interruptReceived_)
      return 0;
@@ -47,7 +54,7 @@ int Snake::run() {
   return 0;
 }
 
-void Snake::initMaze(int argc, char* pArgv[]) {
+void LedMatrixApp::initMaze(int argc, char* pArgv[]) {
  for(int x = 0; x < 128; x++)
    for(int y = 0; y < 32; y++)
      pField_[x][y] = Item::None;
@@ -66,7 +73,7 @@ void Snake::initMaze(int argc, char* pArgv[]) {
   }
 }
 
-void Snake::generateMaze() {
+void LedMatrixApp::generateMaze() {
   for(int x = 0; x < 128; x++) {
     pField_[x][0]  = Item::Wall; 
     pField_[x][31] = Item::Wall; 
@@ -78,7 +85,7 @@ void Snake::generateMaze() {
   }    
 }
 
-void Snake::draw() {
+void LedMatrixApp::draw() {
   for(int x=0; x<128; x++) {
     for(int y=0; y<32; y++) {      
       switch(pField_[x][y]) {
@@ -98,26 +105,30 @@ void Snake::draw() {
   }
 }
 
-void Snake::tick() {
+void LedMatrixApp::tick() {
   printf("tick\n");
 
  
 }
 
-void Snake::interruptReceived() {
+void LedMatrixApp::interruptReceived() {
   interruptReceived_ = true;
 }
 
-void Snake::interruptHandler(int sigNo) {
+void LedMatrixApp::interruptHandler(int sigNo) {
   // TODO: don't ignore sigNo
 
-  Snake::_instance()->interruptReceived();
+  LedMatrixApp::_instance()->interruptReceived();
 }
 
-int main(int argc, char* pArgv[]) { 
-  Snake::_create();
-  Snake::_instance()->init(argc, pArgv);
+//-----------------------------------------------------
+// main
+//-----------------------------------------------------
 
-  return Snake::_instance()->run();
+int main(int argc, char* pArgv[]) { 
+  LedMatrixApp::_create();
+  LedMatrixApp::_instance()->init(argc, pArgv);
+
+  return LedMatrixApp::_instance()->run();
 }
 

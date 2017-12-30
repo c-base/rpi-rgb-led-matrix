@@ -1,3 +1,6 @@
+#ifndef _SNAKE_H
+#define _SNAKE_H
+
 #include "led-matrix.h"
 #include "singleton.h"
 
@@ -6,38 +9,59 @@ using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
 
 enum class Item {
-  None = 0,
-  Wall = 1,
-  Food = 2
+  None,
+  Wall,
+  Food
 };
+
+//-----------------------------------------------------
+// Entity
+//-----------------------------------------------------
 
 class Entity {
 public:
-  Entity(const Item& type) : type_(type) {
-    
+  Entity(const Item& type) : type_(type) {}
+  ~Entity() {}
+
+  void render() {
+  
   }
 
-  ~Entity();
-
 private:
-  Item pField_[128][32]; // 128x32: TODO: move to abstract class
+  Item pField_[128][32];
   const Item type_;
 };
 
-class Maze : public Entity(Item::Wall) {
+//-----------------------------------------------------
+// Maze
+//-----------------------------------------------------
+
+class Maze : public Entity {
 public:
+  Maze() : Entity(Item::Wall) {}
 
 private:
 };
 
-class Food : public Entity(Item::Food) {
+//-----------------------------------------------------
+// Food
+//-----------------------------------------------------
 
+class Food : public Entity {
+public:
+  Food() : Entity(Item::Food) {}
+
+private:
 };
 
-class Snake : public FactorySingleton<Snake> {
+//-----------------------------------------------------
+// LedMatrixApp
+//-----------------------------------------------------
+
+class LedMatrixApp : public FactorySingleton<LedMatrixApp> {
 public:
-  Snake();
-  ~Snake();
+  LedMatrixApp();
+  ~LedMatrixApp();
 
   void init(int argc, char* pArgv[]);
   int run();
@@ -54,4 +78,6 @@ private:
   Item pField_[128][32]; // 128x32
   Canvas* pCanvas_{NULL};
 };
+
+#endif // !_SNAKE_H
 
