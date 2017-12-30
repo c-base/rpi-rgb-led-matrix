@@ -30,13 +30,13 @@ public:
   static C* _instance() {
     return _pInstance_;
   }
-  virtual ~FactorySingleton() { }
+  virtual ~FactorySingleton() { _destroy(); }
 
 private:
   static C* _pInstance_;
 
 protected:
-  FactorySingleton() { }
+  FactorySingleton()  { }
 };
 
 template <typename C> C* FactorySingleton <C>::_pInstance_ = nullptr;
